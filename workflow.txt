@@ -1,4 +1,0 @@
-1. generate a random number between 20-25
-2. select random numbers between 60.
-3. for each random number start a thread with a request.
-4. when all the threads are complete. close them, and repeat the process.
