@@ -6,9 +6,9 @@ const {
 } = require("worker_threads");
 const path = require("path");
 
-const requestsPerMinute = 25;
-const intervalTimeSeconds = 10;
-const totalPages = 3860;
+const requestsPerMinute = 22;
+const intervalTimeSeconds = 5;
+const totalPages = 23; //3860;
 const workerPath = path.resolve("request-worker.js");
 
 const sendRequests = (pageStart) => {
@@ -18,7 +18,7 @@ const sendRequests = (pageStart) => {
     );
     try {
       const results = await Promise.all(
-        numbers.map((number, i) => {
+        numbers.map((number, ind) => {
           setTimeout(() => {
             new Promise((resolve, reject) => {
               const worker = new Worker(workerPath, {
@@ -31,7 +31,7 @@ const sendRequests = (pageStart) => {
                   reject(new Error(`Worker stopped with exit code ${code}`));
               });
             });
-          }, 2000 * i);
+          }, 2000 * ind);
         })
       );
       parentResolve(results);
@@ -41,16 +41,18 @@ const sendRequests = (pageStart) => {
   });
 };
 
-sendRequests(1);
-
-// let itr = 1;
-// let workingPage = 1;
-// const intervalID = setInterval(async () => {
-//   await sendRequests(workingPage);
-//   workingPage += requestsPerMinute;
-//   itr++;
-//   if (itr > requestsPerMinute) {
-//     itr = 1;
-//     clearInterval(intervalID);
+// sendRequests(1);
+// const run = async () => {
+//   for (let i = 1; i <= totalPages; ) {
+//     const result = await sendRequests(i);
+//     // console.log(result);
 //   }
-// }, intervalTimeSeconds * 1000);
+// };
+
+// run();
+
+for (let i = 1; i <= totalPages; i += requestsPerMinute) {
+  sendRequests(i).then(() => {
+    console.log("done with the function");
+  });
+}
