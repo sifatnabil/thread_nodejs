@@ -7,7 +7,7 @@ const {
 const path = require("path");
 
 const requestsPerMinute = 25;
-const intervalTimeSeconds = 5;
+const intervalTimeSeconds = 10;
 const totalPages = 3860;
 const workerPath = path.resolve("request-worker.js");
 
