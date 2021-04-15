@@ -79,27 +79,28 @@ const data = {
   ],
 };
 
-axios
-  .post(url, data, options)
-  .then((response) => {
-    jsonContent = JSON.stringify(response.data);
-    fs.writeFile(
-      "data/belgium_" + pageNo + ".json",
-      jsonContent,
-      "utf8",
-      (err) => {
-        if (err) {
-          console.log(
-            "An error occured during writing the JSON object to file"
-          );
-          console.log(err);
-        }
-        console.log("Done for page: " + pageNo);
-      }
-    );
-  })
-  .catch((err) => {
-    fs.appendFile("error_log.txt", url, () => {});
-  });
+// axios
+//   .post(url, data, options)
+//   .then((response) => {
+//     jsonContent = JSON.stringify(response.data);
+//     fs.writeFile(
+//       "data/belgium_" + pageNo + ".json",
+//       jsonContent,
+//       "utf8",
+//       (err) => {
+//         if (err) {
+//           console.log(
+//             "An error occured during writing the JSON object to file"
+//           );
+//           console.log(err);
+//         }
+//         console.log("Done for page: " + pageNo);
+//       }
+//     );
+//   })
+//   .catch((err) => {
+//     fs.appendFile("error_log.txt", url, () => {});
+//   });
 
+console.log("triggered page: " + pageNo);
 // parentPort.postMessage(url);
