@@ -5,6 +5,7 @@ const {
   workerData,
 } = require("worker_threads");
 const path = require("path");
+const sleep = require("util").promisify(setTimeout);
 
 const requestsPerMinute = 22;
 const intervalTimeSeconds = 5;
@@ -18,20 +19,20 @@ const sendRequests = (pageStart) => {
     );
     try {
       const results = await Promise.all(
-        numbers.map((number, ind) => {
-          setTimeout(() => {
-            new Promise((resolve, reject) => {
-              const worker = new Worker(workerPath, {
-                workerData: number,
-              });
-              worker.on("message", resolve);
-              worker.on("error", reject);
-              worker.on("exit", (code) => {
-                if (code !== 0)
-                  reject(new Error(`Worker stopped with exit code ${code}`));
-              });
+        numbers.map(async (number, ind) => {
+          if (number > totalPages) return;
+          await sleep(ind * 2000);
+          new Promise((resolve, reject) => {
+            const worker = new Worker(workerPath, {
+              workerData: number,
             });
-          }, 2000 * ind);
+            worker.on("message", resolve);
+            worker.on("error", reject);
+            worker.on("exit", (code) => {
+              if (code !== 0)
+                reject(new Error(`Worker stopped with exit code ${code}`));
+            });
+          });
         })
       );
       parentResolve(results);
@@ -42,17 +43,15 @@ const sendRequests = (pageStart) => {
 };
 
 // sendRequests(1);
-// const run = async () => {
-//   for (let i = 1; i <= totalPages; ) {
-//     const result = await sendRequests(i);
-//     // console.log(result);
-//   }
-// };
 
-// run();
+const run = async () => {
+  for (let i = 1; i <= totalPages; ) {
+    console.log("Starting for i: " + i);
+    await sendRequests(i);
+    console.log("Done with the function");
+    await sleep(intervalTimeSeconds * 1000);
+    i += requestsPerMinute;
+  }
+};
 
-for (let i = 1; i <= totalPages; i += requestsPerMinute) {
-  sendRequests(i).then(() => {
-    console.log("done with the function");
-  });
-}
+run();
