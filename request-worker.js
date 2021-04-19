@@ -1,9 +1,9 @@
-const axios = require("axios");
+const { default: axios } = require("axios");
 const { parentPort, workerData } = require("worker_threads");
 const { api_url, api_cookie } = require("./config");
-const fs = require("fs");
 
-const pageNo = workerData;
+const number = workerData;
+
 const options = {
   headers: {
     "Content-Type": "application/json",
@@ -13,7 +13,7 @@ const options = {
   },
 };
 
-const url = api_url + pageNo;
+const url = api_url + number;
 
 const data = {
   address: "",
@@ -79,44 +79,37 @@ const data = {
   ],
 };
 
-// axios
-//   .post(url, data, options)
-//   .then((response) => {
-//     jsonContent = JSON.stringify(response.data);
-//     fs.writeFile(
-//       "data/belgium_" + pageNo + ".json",
-//       jsonContent,
-//       "utf8",
-//       (err) => {
-//         if (err) {
-//           console.log(
-//             "An error occured during writing the JSON object to file"
-//           );
-//           console.log(err);
-//         }
-//         console.log("Done for page: " + pageNo);
-//       }
-//     );
-//   })
-//   .catch((err) => {
-//     fs.appendFile("error_log.txt", url + "\n", () => {});
-//   });
+const runQuery = async () => {
+  // await axios
+  //   .post(url, data, options)
+  //   .then((res) => console.log("Done for page: " + number));
 
-// const doWork = async () => {
-//   await axios
-//     .post(url, data, options)
-//     .then((res) => {
-//       console.log("Done for the page: " + pageNo);
-//     })
-//     .catch((err) => {
-//       fs.appendFile("error_log.txt", url + "\n", () => {});
-//     });
-//   parentPort.postMessage(url);
-// };
+  await axios
+    .post(url, data, options)
+    .then((response) => {
+      jsonContent = JSON.stringify(response.data);
+      fs.writeFile(
+        "data/belgium_" + pageNo + ".json",
+        jsonContent,
+        "utf8",
+        (err) => {
+          if (err) {
+            console.log(
+              "An error occured during writing the JSON object to file"
+            );
+            console.log(err);
+          }
+          console.log("Done for page: " + pageNo);
+        }
+      );
+    })
+    .catch((err) => {
+      fs.appendFile("error_log.txt", url + "\n", () => {});
+    });
 
-// doWork();
-// console.log("triggered page: " + pageNo);
+  parentPort.postMessage(number);
+};
 
-const result = pageNo + 1;
+runQuery();
 
-parentPort.postMessage(result);
+// console.log("Page Done: " + number);
