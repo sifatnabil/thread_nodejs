@@ -7,12 +7,12 @@ const {
 const path = require("path");
 const sleep = require("util").promisify(setTimeout);
 
-const workerPath = path.resolve("./test-worker.js");
-const requestsPerMinute = 22;
+const workerPath = path.resolve("./request-worker.js");
+const requestsPerMinute = 1;
 const totalPages = 3860;
 const intervalTimeSeconds = 3;
 
-const calculatePageNo = (pageStart) => {
+const sendRequests = (pageStart) => {
   let arraySize = 0;
   if (pageStart + requestsPerMinute < totalPages) arraySize = requestsPerMinute;
   else arraySize = totalPages - pageStart + 1;
@@ -37,14 +37,14 @@ const calculatePageNo = (pageStart) => {
   return Promise.all(promises).then((res) => console.log(res));
 };
 
-// calculatePageNo(1).then(() => {
+// sendRequests(600).then(() => {
 //   console.log("Done with the page");
 // });
 
 const run = async () => {
   for (let i = 547; i <= totalPages; ) {
     console.log("Batch starting page: " + i);
-    await calculatePageNo(i);
+    await sendRequests(i);
     console.log("Done with the Batch\n");
     await sleep(intervalTimeSeconds * 1000);
     i += requestsPerMinute;

@@ -1,6 +1,7 @@
 const { default: axios } = require("axios");
 const { parentPort, workerData } = require("worker_threads");
 const { api_url, api_cookie } = require("./config");
+const fs = require("fs");
 
 const number = workerData;
 
@@ -80,16 +81,12 @@ const data = {
 };
 
 const runQuery = async () => {
-  // await axios
-  //   .post(url, data, options)
-  //   .then((res) => console.log("Done for page: " + number));
-
   await axios
     .post(url, data, options)
     .then((response) => {
       jsonContent = JSON.stringify(response.data);
       fs.writeFile(
-        "data/belgium_" + pageNo + ".json",
+        "data/belgium_" + number + ".json",
         jsonContent,
         "utf8",
         (err) => {
@@ -99,7 +96,7 @@ const runQuery = async () => {
             );
             console.log(err);
           }
-          console.log("Done for page: " + pageNo);
+          console.log("Done for page: " + number);
         }
       );
     })
