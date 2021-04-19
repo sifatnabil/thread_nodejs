@@ -79,28 +79,44 @@ const data = {
   ],
 };
 
-axios
-  .post(url, data, options)
-  .then((response) => {
-    jsonContent = JSON.stringify(response.data);
-    fs.writeFile(
-      "data/belgium_" + pageNo + ".json",
-      jsonContent,
-      "utf8",
-      (err) => {
-        if (err) {
-          console.log(
-            "An error occured during writing the JSON object to file"
-          );
-          console.log(err);
-        }
-        console.log("Done for page: " + pageNo);
-      }
-    );
-  })
-  .catch((err) => {
-    fs.appendFile("error_log.txt", url, () => {});
-  });
+// axios
+//   .post(url, data, options)
+//   .then((response) => {
+//     jsonContent = JSON.stringify(response.data);
+//     fs.writeFile(
+//       "data/belgium_" + pageNo + ".json",
+//       jsonContent,
+//       "utf8",
+//       (err) => {
+//         if (err) {
+//           console.log(
+//             "An error occured during writing the JSON object to file"
+//           );
+//           console.log(err);
+//         }
+//         console.log("Done for page: " + pageNo);
+//       }
+//     );
+//   })
+//   .catch((err) => {
+//     fs.appendFile("error_log.txt", url + "\n", () => {});
+//   });
 
+// const doWork = async () => {
+//   await axios
+//     .post(url, data, options)
+//     .then((res) => {
+//       console.log("Done for the page: " + pageNo);
+//     })
+//     .catch((err) => {
+//       fs.appendFile("error_log.txt", url + "\n", () => {});
+//     });
+//   parentPort.postMessage(url);
+// };
+
+// doWork();
 // console.log("triggered page: " + pageNo);
-// parentPort.postMessage(url);
+
+const result = pageNo + 1;
+
+parentPort.postMessage(result);

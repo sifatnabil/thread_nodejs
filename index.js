@@ -7,51 +7,45 @@ const {
 const path = require("path");
 const sleep = require("util").promisify(setTimeout);
 
-const requestsPerMinute = 22;
+const requestsPerMinute = 5;
 const intervalTimeSeconds = 5;
-const totalPages = 23; //3860;
+const totalPages = 1000; //3860;
 const workerPath = path.resolve("request-worker.js");
 
 const sendRequests = (pageStart) => {
-  return new Promise(async (parentResolve, parentReject) => {
-    const numbers = [...new Array(requestsPerMinute)].map(
-      (_, i) => pageStart + i
-    );
-    try {
-      const results = await Promise.all(
-        numbers.map(async (number, ind) => {
-          if (number > totalPages) return;
-          await sleep(ind * 2000);
-          new Promise((resolve, reject) => {
-            const worker = new Worker(workerPath, {
-              workerData: number,
-            });
-            worker.on("message", resolve);
-            worker.on("error", reject);
-            worker.on("exit", (code) => {
-              if (code !== 0)
-                reject(new Error(`Worker stopped with exit code ${code}`));
-            });
-          });
-        })
-      );
-      parentResolve(results);
-    } catch (e) {
-      parentReject(e);
-    }
+  let arraySize = 0;
+  if (pageStart + requestsPerMinute < totalPages) arraySize = requestsPerMinute;
+  else arraySize = totalPages - pageStart + 1;
+
+  const numbers = [...new Array(arraySize)].map((_, i) => pageStart + i);
+
+  const results = numbers.map((number, ind) => {
+    // await sleep(2000 * ind);
+    new Promise((resolve, reject) => {
+      const worker = new Worker(workerPath, {
+        workerData: number,
+      });
+      worker.once("message", resolve);
+      worker.on("eror", reject);
+      worker.on("exit", (code) => {
+        if (code !== 0)
+          reject(new Error(`Worker stopped with exit code ${code}`));
+      });
+    });
   });
+
+  return Promise.all(results).then((res) => console.log(res));
 };
 
-// sendRequests(1);
+sendRequests(523);
 
-const run = async () => {
-  for (let i = 1; i <= totalPages; ) {
-    console.log("Starting for i: " + i);
-    await sendRequests(i);
-    console.log("Done with the function");
-    await sleep(intervalTimeSeconds * 1000);
-    i += requestsPerMinute;
-  }
-};
+// const run = async () => {
+//   for (let i = 545; i <= totalPages; ) {
+//     console.log("i: " + i);
+//     await sendRequests(i).then(() => console.log("done with the function"));
+//     await sleep(intervalTimeSeconds * 1000);
+//     i += requestsPerMinute;
+//   }
+// };
 
-run();
+// run();
