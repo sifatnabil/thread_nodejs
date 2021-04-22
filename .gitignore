@@ -7,3 +7,5 @@ cdpRequest.js
 node_modules
 .env
 test-worker.js
+*.txt
+pageGenerator.js

@@ -5,19 +5,20 @@ const {
   workerData,
 } = require("worker_threads");
 const path = require("path");
+const fs = require("fs");
 const sleep = require("util").promisify(setTimeout);
 
 const workerPath = path.resolve("./request-worker.js");
-const requestsPerMinute = 1;
+const requestsPerMinute = 22;
 const totalPages = 3860;
-const intervalTimeSeconds = 3;
+const intervalTimeSeconds = 5;
 
-const sendRequests = (pageStart) => {
-  let arraySize = 0;
-  if (pageStart + requestsPerMinute < totalPages) arraySize = requestsPerMinute;
-  else arraySize = totalPages - pageStart + 1;
+const sendRequests = (pageStart, numbers) => {
+  // let arraySize = 0;
+  // if (pageStart + requestsPerMinute < totalPages) arraySize = requestsPerMinute;
+  // else arraySize = totalPages - pageStart + 1;
 
-  const numbers = [...new Array(arraySize)].map((_, i) => pageStart + i);
+  // const numbers = [...new Array(arraySize)].map((_, i) => pageStart + i);
 
   const promises = numbers.map(async (number, ind) => {
     await sleep(2000 * ind);
@@ -25,7 +26,7 @@ const sendRequests = (pageStart) => {
       const worker = new Worker(workerPath, {
         workerData: number,
       });
-      worker.once("message", resolve);
+      worker.on("message", resolve);
       worker.on("eror", reject);
       worker.on("exit", (code) => {
         if (code !== 0)
@@ -41,13 +42,42 @@ const sendRequests = (pageStart) => {
 //   console.log("Done with the page");
 // });
 
+// const run = async () => {
+//   for (let i = 2430; i <= totalPages; ) {
+//     console.log("Batch starting page: " + i);
+//     await sendRequests(i);
+//     console.log("Done with the Batch\n");
+//     await sleep(intervalTimeSeconds * 1000);
+//     i += requestsPerMinute;
+//   }
+// };
+
 const run = async () => {
-  for (let i = 547; i <= totalPages; ) {
-    console.log("Batch starting page: " + i);
-    await sendRequests(i);
+  const fileContent = fs.readFileSync("germany_pages.txt", "utf8");
+  const pageNumbers = fileContent.split("\n");
+  for (let i = 0; i < pageNumbers.length; i += requestsPerMinute) {
+    let arraySize = 0;
+    let iterationCount = 0;
+    const numbers = [];
+    if (i + requestsPerMinute - 1 <= pageNumbers.length) {
+      arraySize = requestsPerMinute;
+      iterationCount = i + arraySize - 1;
+    } else {
+      arraySize = pageNumbers.length - i;
+      iterationCount = i + arraySize - 1;
+    }
+
+    console.log("Array size: " + arraySize);
+    console.log(iterationCount);
+
+    for (let j = i; j <= iterationCount; j++) {
+      numbers.push(pageNumbers[j].trim());
+    }
+
+    console.log("Batch starting page: " + pageNumbers[i]);
+    await sendRequests(pageNumbers[i], numbers);
     console.log("Done with the Batch\n");
     await sleep(intervalTimeSeconds * 1000);
-    i += requestsPerMinute;
   }
 };
 
