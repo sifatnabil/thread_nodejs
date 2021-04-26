@@ -34,7 +34,7 @@ const sendRequests = (numbers) => {
 const run = async () => {
   const fileContent = fs.readFileSync("germany_pages.txt", "utf8");
   const pageNumbers = fileContent.split("\n");
-  for (let i = 1606; i < pageNumbers.length; i += requestsPerMinute) {
+  for (let i = 3981; i < pageNumbers.length; i += requestsPerMinute) {
     let arraySize = 0;
     let iterationCount = 0;
     const numbers = [];

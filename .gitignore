@@ -9,3 +9,5 @@ node_modules
 test-worker.js
 *.txt
 pageGenerator.js
+dummyJS.js
+dummy2.js
